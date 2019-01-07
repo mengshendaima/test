@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"   "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="me.zingon.Test.dao.NlpDao">
+    <resultMap id="words" type="Words">
+        <id property="id" column="id"/>
+        <result property="word" column="word"/>
+        <result property="type" column="type"/>
+        <result property="function" column="function"/>
+    </resultMap>
+
+    <select id="queryWords" resultMap="words">
+        SELECT * FROM nlp where type=#{type}
+    </select>
+
+
+</mapper>

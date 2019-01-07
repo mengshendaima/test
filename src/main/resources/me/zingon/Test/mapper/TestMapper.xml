@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"   "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="me.zingon.Test.dao.TestDao">
+    <resultMap id="test" type="Test">
+        <id property="a" column="a"/>
+        <result property="b" column="b"/>
+        <result property="c" column="c"/>
+        <result property="d" column="d"/>
+    </resultMap>
+
+    <select id="listAll" resultMap="test">
+        SELECT * FROM a
+    </select>
+
+
+</mapper>

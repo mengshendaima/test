@@ -1,0 +1,195 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+       xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+       xmlns:aop="http://www.springframework.org/schema/aop"
+       xmlns:context="http://www.springframework.org/schema/context"
+       xmlns:tx="http://www.springframework.org/schema/tx"
+       xmlns:cache="http://www.springframework.org/schema/cache"
+       xmlns:util="http://www.springframework.org/schema/util"
+       xsi:schemaLocation="http://www.springframework.org/schema/beans
+       					   http://www.springframework.org/schema/beans/spring-beans-4.3.xsd
+       					   http://www.springframework.org/schema/aop
+           					http://www.springframework.org/schema/aop/spring-aop-4.3.xsd
+      	 				   http://www.springframework.org/schema/context
+       					   http://www.springframework.org/schema/context/spring-context-4.3.xsd
+       					    http://www.springframework.org/schema/tx
+           					http://www.springframework.org/schema/tx/spring-tx-4.3.xsd
+           					http://www.springframework.org/schema/cache
+           					http://www.springframework.org/schema/cache/spring-cache.xsd http://www.springframework.org/schema/util http://www.springframework.org/schema/util/spring-util.xsd">
+
+    <!-- 启动对@AspectJ注解的支持 -->
+    <aop:aspectj-autoproxy />
+
+    <!--spring启动时不扫描controller -->
+    <context:component-scan base-package="me.zingon">
+        <context:exclude-filter type="annotation"
+                                expression="org.springframework.stereotype.Controller" />
+    </context:component-scan>
+
+    <!-- 加载可以再java代码中使用的 资源文件 -->
+    <!--<util:properties id="msg" location="classpath:config/msg.properties"/>-->
+
+
+    <!-- 加载本地资源 start-->
+    <context:property-placeholder location="classpath:config/config.properties" />
+
+
+    <!-- 加载本地资源 end-->
+
+    <!-- myBatis配置 -->
+    <bean id="dataSource" class="com.alibaba.druid.pool.DruidDataSource"  init-method="init" destroy-method="close">
+        <property name="driverClassName" value="${db.driver}"/>
+        <property name="url" value="${db.url}"/>
+        <property name="username" value="${db.username}"/>
+        <property name="password" value="${db.password}"/>
+
+        <property name="initialSize" value="${db.initialSize}"/>
+        <property name="maxActive" value="${db.maxActive}"/>
+
+        <!-- 开启Druid的监控统计功能 -->
+        <property name="filters" value="stat,log4j" />
+    </bean>
+    <bean id="txManager"
+          class="org.springframework.jdbc.datasource.DataSourceTransactionManager">
+        <property name="dataSource" ref="dataSource" />
+    </bean>
+    <tx:annotation-driven transaction-manager="txManager" />
+
+    <bean id="sqlSessionFactory" class="org.mybatis.spring.SqlSessionFactoryBean">
+        <property name="dataSource" ref="dataSource" />
+        <property name="configLocation" value="classpath:config/mybatis.xml" />
+        <property name="mapperLocations" value="classpath:me/zingon/Test/mapper/*.xml" />
+    </bean>
+
+    <!-- DAO接口所在包名，Spring会自动查找其下的类 -->
+    <bean class="org.mybatis.spring.mapper.MapperScannerConfigurer">
+        <property name="basePackage" value="me.zingon.Test.dao" />
+        <property name="sqlSessionFactoryBeanName" value="sqlSessionFactory" />
+    </bean>
+    <!-- myBatis配置结束 -->
+
+
+    <!-- httpClient start -->
+    <!-- 定义连接管理器 -->
+    <!--<bean id="httpClientConnectionManager"
+          class="org.apache.http.impl.conn.PoolingHttpClientConnectionManager"
+          destroy-method="close">
+        &lt;!&ndash; 最大连接数 &ndash;&gt;
+        <property name="maxTotal" value="${http.maxTotal}" />
+
+        &lt;!&ndash; 设置每个主机地址的并发数 &ndash;&gt;
+        <property name="defaultMaxPerRoute" value="${http.defaultMaxPerRoute}" />
+    </bean>
+
+    &lt;!&ndash; httpclient对象构建器 &ndash;&gt;
+    <bean id="httpClientBuilder" class="org.apache.http.impl.client.HttpClientBuilder">
+        &lt;!&ndash; 设置连接管理器 &ndash;&gt;
+        <property name="connectionManager" ref="httpClientConnectionManager" />
+    </bean>
+
+    &lt;!&ndash; 定义Httpclient对象 &ndash;&gt;
+    <bean id="httpClient" class="org.apache.http.impl.client.CloseableHttpClient"
+          factory-bean="httpClientBuilder" factory-method="build" scope="prototype">
+    </bean>
+
+    <bean id="proxyHost" class="org.apache.http.HttpHost">
+        <constructor-arg type="java.lang.String">
+            <value>${proxy.host}</value>
+        </constructor-arg>
+        <constructor-arg type="int">
+            <value>${proxy.port}</value>
+        </constructor-arg>
+        <constructor-arg type="java.lang.String">
+            <value>${proxy.schemeName}</value>
+        </constructor-arg>
+    </bean>
+
+    <bean id="requestConfigBuilder" class="org.apache.http.client.config.RequestConfig.Builder">
+        &lt;!&ndash; 创建连接的最长时间 &ndash;&gt;
+        <property name="connectTimeout" value="${http.connectTimeout}" />
+        &lt;!&ndash; 从连接池中获取到连接的最长时间 &ndash;&gt;
+        <property name="connectionRequestTimeout" value="${http.connectionRequestTimeout}" />
+        &lt;!&ndash; 数据传输的最长时间 &ndash;&gt;
+        <property name="socketTimeout" value="${http.socketTimeout}" />
+        &lt;!&ndash; 提交请求前测试连接是否可用 &ndash;&gt;
+        <property name="staleConnectionCheckEnabled" value="${http.staleConnectionCheckEnabled}" />
+        &lt;!&ndash; 代理&ndash;&gt;
+        <property name="proxy" ref="proxyHost" />
+
+    </bean>
+    &lt;!&ndash; 定义请求参数 &ndash;&gt;
+    <bean id="requestConfig" class="org.apache.http.client.config.RequestConfig"
+          factory-bean="requestConfigBuilder" factory-method="build">
+    </bean>-->
+    <!-- httpClient end -->
+
+    <!-- Mail start -->
+    <!--<bean id="mailSender" class="org.springframework.mail.javamail.JavaMailSenderImpl">
+        <property name="host" value="${mail.host}" />
+        <property name="username" value="${mail.username}" />
+        <property name="password" value="${mail.password}" />
+        <property name="javaMailProperties">
+            <props>
+                <prop key="mail.smtp.auth">true</prop>
+                <prop key="mail.smtp.starttls.enable">true</prop>
+                <prop key="mail.smtp.timeout">250000</prop>
+            </props>
+        </property>
+    </bean>-->
+
+    <!-- Mail end -->
+
+    <!-- 线程池 start-->
+    <!--<bean id="taskExecutor"
+          class="org.springframework.scheduling.concurrent.ThreadPoolTaskExecutor">
+        &lt;!&ndash; 核心线程数 &ndash;&gt;
+        <property name="corePoolSize" value="${task.core_pool_size}" />
+        &lt;!&ndash; 最大线程数 &ndash;&gt;
+        <property name="maxPoolSize" value="${task.max_pool_size}" />
+        &lt;!&ndash; 队列最大长度 &ndash;&gt;
+        <property name="queueCapacity" value="${task.queue_capacity}" />
+        &lt;!&ndash; 线程池维护线程所允许的空闲时间，默认为60s &ndash;&gt;
+        <property name="keepAliveSeconds" value="${task.keep_alive_seconds}" />
+    </bean>-->
+    <!-- 线程池 end -->
+
+    <!-- redis start -->
+    <!--<cache:annotation-driven/>
+    <bean id="lettuceConnectionFactory" class="org.springframework.data.redis.connection.lettuce.LettuceConnectionFactory">
+        <property name="hostName"	 value="${redis.host}"/>
+        <property name="port"		 value="${redis.port}"/>
+        <property name="password"	 value="${redis.pass}"/>
+    </bean>
+
+    <bean id="redisTemplate" class="org.springframework.data.redis.core.RedisTemplate">
+        <property name="connectionFactory"   ref="lettuceConnectionFactory" />
+        <property name="keySerializer" >
+            <bean class="org.springframework.data.redis.serializer.StringRedisSerializer"/>
+        </property>
+        <property name="valueSerializer" >
+            <bean class="org.springframework.data.redis.serializer.JdkSerializationRedisSerializer"/>
+        </property>
+    </bean>
+
+    <bean id='cacheManager' class='org.springframework.data.redis.cache.RedisCacheManager'>
+        <constructor-arg index="0" ref="redisTemplate"/>
+    </bean>
+
+    <bean class="org.springframework.session.data.redis.config.annotation.web.http.RedisHttpSessionConfiguration">
+        &lt;!&ndash; 过期时间100分钟 &ndash;&gt;
+        &lt;!&ndash; 配置RedisSession &ndash;&gt;
+        <property name="maxInactiveIntervalInSeconds" value="6000"></property>
+    </bean>-->
+    <!-- redis end -->
+    <!-- 国际化 start -->
+    <!--<bean id="localeResolver" class="org.springframework.web.servlet.i18n.CookieLocaleResolver">
+        <property name="cookieMaxAge" value="604800"/>
+        <property name="defaultLocale" value="zh_CN"/>
+        <property name="cookieName" value="Language"/>
+    </bean>
+    <bean id="messageSource" class="org.springframework.context.support.ResourceBundleMessageSource">
+        <property name="basename" value="language.message"/>
+        <property name="defaultEncoding" value="UTF-8"/>
+    </bean>-->
+    <!-- 国际化 end -->
+</beans>
